@@ -5,7 +5,7 @@
     WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
 ]]
 -- =====================================================================
--- CENIROSO REMOTE SPY - V1.8 (Giao dien moi - Than thien nguoi dung)
+-- CENIROSO REMOTE SPY - V1.8 (Giao dien moi - Than thien mobile)
 -- =====================================================================
 
 if getgenv().SoroniceV1SpyLoaded then
@@ -26,14 +26,18 @@ local RemoteQueue = {}
 local IsSlowMode = false
 local MAX_QUEUE_SIZE = 150
 
--- Trang thai moi
+-- Trang thai
 local IsCollecting = true
 local IsMinimized = false
 local selectedButton = nil
 local totalRemotes = 0
 
+-- Kich thuoc gioi han khi resize
+local MIN_W, MIN_H = 340, 230
+local MAX_W, MAX_H = 900, 600
+
 -- =====================================================================
--- 1. GIAO DIEN NGUOI DUNG (UI) - THIET KE MOI
+-- 1. GIAO DIEN NGUOI DUNG (UI)
 -- =====================================================================
 
 -- Bang mau chu dao
@@ -52,6 +56,7 @@ local C = {
     Text3     = Color3.fromRGB(72, 78, 92),
     Border    = Color3.fromRGB(38, 40, 50),
     Selected  = Color3.fromRGB(55, 90, 180),
+    Resize    = Color3.fromRGB(55, 58, 70),
 }
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -65,17 +70,17 @@ local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "ToggleBtn"
 ToggleBtn.Parent = ScreenGui
 ToggleBtn.BackgroundColor3 = C.Accent
-ToggleBtn.Position = UDim2.new(0, 16, 0.5, -20)
-ToggleBtn.Size = UDim2.new(0, 40, 0, 40)
+ToggleBtn.Position = UDim2.new(0, 10, 0.7, 0)
+ToggleBtn.Size = UDim2.new(0, 38, 0, 38)
 ToggleBtn.Font = Enum.Font.GothamBold
 ToggleBtn.Text = "RS"
 ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.TextSize = 14
+ToggleBtn.TextSize = 13
 ToggleBtn.ZIndex = 100
 ToggleBtn.Active = true
 ToggleBtn.Visible = false
 
-Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 20)
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 19)
 
 local tglStroke = Instance.new("UIStroke")
 tglStroke.Parent = ToggleBtn
@@ -97,14 +102,14 @@ task.spawn(function()
     end
 end)
 
--- ========== KHUNG CHINH ==========
+-- ========== KHUNG CHINH (nho hon, phu hop mobile) ==========
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = C.Bg
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -310, 0.5, -210)
-MainFrame.Size = UDim2.new(0, 620, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -220, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 440, 0, 300)
 MainFrame.Active = true
 MainFrame.ClipsDescendants = true
 
@@ -122,7 +127,7 @@ TopBar.Name = "TopBar"
 TopBar.Parent = MainFrame
 TopBar.BackgroundColor3 = C.TopBar
 TopBar.BorderSizePixel = 0
-TopBar.Size = UDim2.new(1, 0, 0, 36)
+TopBar.Size = UDim2.new(1, 0, 0, 34)
 
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
 
@@ -137,12 +142,12 @@ local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = TopBar
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 14, 0, 0)
-Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Size = UDim2.new(0.45, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "Remote Spy v1.8"
 Title.TextColor3 = C.Text1
-Title.TextSize = 13
+Title.TextSize = 12
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Cham trang thai + nhan
@@ -150,26 +155,26 @@ local StatusDot = Instance.new("Frame")
 StatusDot.Parent = TopBar
 StatusDot.BackgroundColor3 = C.Green
 StatusDot.Size = UDim2.new(0, 7, 0, 7)
-StatusDot.Position = UDim2.new(1, -138, 0.5, -3)
+StatusDot.Position = UDim2.new(1, -120, 0.5, -3)
 Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)
 
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Parent = TopBar
 StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(1, -127, 0, 0)
-StatusLabel.Size = UDim2.new(0, 65, 1, 0)
+StatusLabel.Position = UDim2.new(1, -109, 0, 0)
+StatusLabel.Size = UDim2.new(0, 50, 1, 0)
 StatusLabel.Font = Enum.Font.Gotham
 StatusLabel.Text = "Dang thu"
 StatusLabel.TextColor3 = C.Green
-StatusLabel.TextSize = 11
+StatusLabel.TextSize = 10
 StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Nut thu nho (minimize)
 local MinBtn = Instance.new("TextButton")
 MinBtn.Parent = TopBar
 MinBtn.BackgroundTransparency = 1
-MinBtn.Position = UDim2.new(1, -56, 0, 0)
-MinBtn.Size = UDim2.new(0, 28, 1, 0)
+MinBtn.Position = UDim2.new(1, -52, 0, 0)
+MinBtn.Size = UDim2.new(0, 26, 1, 0)
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.Text = "-"
 MinBtn.TextColor3 = C.Text2
@@ -180,12 +185,12 @@ local CloseButton = Instance.new("TextButton")
 CloseButton.Name = "CloseButton"
 CloseButton.Parent = TopBar
 CloseButton.BackgroundTransparency = 1
-CloseButton.Position = UDim2.new(1, -28, 0, 0)
-CloseButton.Size = UDim2.new(0, 28, 1, 0)
+CloseButton.Position = UDim2.new(1, -26, 0, 0)
+CloseButton.Size = UDim2.new(0, 26, 1, 0)
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.Text = "X"
 CloseButton.TextColor3 = C.Text2
-CloseButton.TextSize = 13
+CloseButton.TextSize = 12
 
 -- Hover cho cac nut tren thanh tieu de
 for _, btn in ipairs({MinBtn, CloseButton}) do
@@ -197,13 +202,13 @@ for _, btn in ipairs({MinBtn, CloseButton}) do
     end)
 end
 
--- ========== BANG TRAI (Danh sach Remote) ==========
+-- ========== BANG TRAI (Danh sach Remote) - Scale-based ==========
 local LeftPanel = Instance.new("Frame")
 LeftPanel.Parent = MainFrame
 LeftPanel.BackgroundColor3 = C.Surface
 LeftPanel.BorderSizePixel = 0
-LeftPanel.Position = UDim2.new(0, 8, 0, 44)
-LeftPanel.Size = UDim2.new(0, 200, 1, -52)
+LeftPanel.Position = UDim2.new(0, 6, 0, 40)
+LeftPanel.Size = UDim2.new(0.35, -3, 1, -80)
 Instance.new("UICorner", LeftPanel).CornerRadius = UDim.new(0, 8)
 
 -- O tim kiem
@@ -211,26 +216,26 @@ local SearchBar = Instance.new("Frame")
 SearchBar.Parent = LeftPanel
 SearchBar.BackgroundColor3 = C.SurfaceLt
 SearchBar.BorderSizePixel = 0
-SearchBar.Position = UDim2.new(0, 6, 0, 6)
-SearchBar.Size = UDim2.new(1, -12, 0, 26)
+SearchBar.Position = UDim2.new(0, 5, 0, 5)
+SearchBar.Size = UDim2.new(1, -10, 0, 26)
 Instance.new("UICorner", SearchBar).CornerRadius = UDim.new(0, 5)
 
 local SearchIcon = Instance.new("TextLabel")
 SearchIcon.Parent = SearchBar
 SearchIcon.BackgroundTransparency = 1
-SearchIcon.Position = UDim2.new(0, 6, 0, 0)
-SearchIcon.Size = UDim2.new(0, 16, 1, 0)
+SearchIcon.Position = UDim2.new(0, 5, 0, 0)
+SearchIcon.Size = UDim2.new(0, 14, 1, 0)
 SearchIcon.Font = Enum.Font.Gotham
 SearchIcon.Text = "?"
 SearchIcon.TextColor3 = C.Text3
-SearchIcon.TextSize = 12
+SearchIcon.TextSize = 11
 
 local SearchBox = Instance.new("TextBox")
 SearchBox.Name = "SearchBox"
 SearchBox.Parent = SearchBar
 SearchBox.BackgroundTransparency = 1
-SearchBox.Position = UDim2.new(0, 22, 0, 0)
-SearchBox.Size = UDim2.new(1, -28, 1, 0)
+SearchBox.Position = UDim2.new(0, 20, 0, 0)
+SearchBox.Size = UDim2.new(1, -25, 1, 0)
 SearchBox.Font = Enum.Font.Gotham
 SearchBox.PlaceholderText = "Tim remote..."
 SearchBox.PlaceholderColor3 = C.Text3
@@ -244,12 +249,12 @@ SearchBox.ClearTextOnFocus = false
 local RemoteCount = Instance.new("TextLabel")
 RemoteCount.Parent = LeftPanel
 RemoteCount.BackgroundTransparency = 1
-RemoteCount.Position = UDim2.new(0, 8, 0, 36)
-RemoteCount.Size = UDim2.new(1, -16, 0, 14)
+RemoteCount.Position = UDim2.new(0, 7, 0, 34)
+RemoteCount.Size = UDim2.new(1, -14, 0, 13)
 RemoteCount.Font = Enum.Font.Gotham
 RemoteCount.Text = "0 remotes"
 RemoteCount.TextColor3 = C.Text3
-RemoteCount.TextSize = 10
+RemoteCount.TextSize = 9
 RemoteCount.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Danh sach cuon remote
@@ -259,8 +264,8 @@ RemotesList.Parent = LeftPanel
 RemotesList.Active = true
 RemotesList.BackgroundTransparency = 1
 RemotesList.BorderSizePixel = 0
-RemotesList.Position = UDim2.new(0, 4, 0, 54)
-RemotesList.Size = UDim2.new(1, -8, 1, -58)
+RemotesList.Position = UDim2.new(0, 3, 0, 50)
+RemotesList.Size = UDim2.new(1, -6, 1, -54)
 RemotesList.CanvasSize = UDim2.new(0, 0, 0, 0)
 RemotesList.ScrollBarThickness = 3
 RemotesList.ScrollBarImageColor3 = C.Text3
@@ -275,13 +280,13 @@ UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     RemotesList.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- ========== BANG PHAI (Hien thi ma nguon) ==========
+-- ========== BANG PHAI (Hien thi ma nguon) - Scale-based ==========
 local RightPanel = Instance.new("Frame")
 RightPanel.Parent = MainFrame
 RightPanel.BackgroundColor3 = C.Surface
 RightPanel.BorderSizePixel = 0
-RightPanel.Position = UDim2.new(0, 216, 0, 44)
-RightPanel.Size = UDim2.new(1, -224, 1, -96)
+RightPanel.Position = UDim2.new(0.35, 3, 0, 40)
+RightPanel.Size = UDim2.new(0.65, -9, 1, -80)
 Instance.new("UICorner", RightPanel).CornerRadius = UDim.new(0, 8)
 
 -- Header ma nguon
@@ -289,7 +294,7 @@ local CodeHeader = Instance.new("Frame")
 CodeHeader.Parent = RightPanel
 CodeHeader.BackgroundColor3 = C.SurfaceLt
 CodeHeader.BorderSizePixel = 0
-CodeHeader.Size = UDim2.new(1, 0, 0, 26)
+CodeHeader.Size = UDim2.new(1, 0, 0, 22)
 Instance.new("UICorner", CodeHeader).CornerRadius = UDim.new(0, 8)
 
 local chHide = Instance.new("Frame")
@@ -302,22 +307,22 @@ chHide.Size = UDim2.new(1, 0, 0, 4)
 local CodeHeaderLbl = Instance.new("TextLabel")
 CodeHeaderLbl.Parent = CodeHeader
 CodeHeaderLbl.BackgroundTransparency = 1
-CodeHeaderLbl.Position = UDim2.new(0, 10, 0, 0)
-CodeHeaderLbl.Size = UDim2.new(1, -20, 1, 0)
+CodeHeaderLbl.Position = UDim2.new(0, 8, 0, 0)
+CodeHeaderLbl.Size = UDim2.new(1, -16, 1, 0)
 CodeHeaderLbl.Font = Enum.Font.GothamBold
 CodeHeaderLbl.Text = "Ma nguon"
 CodeHeaderLbl.TextColor3 = C.Text2
-CodeHeaderLbl.TextSize = 10
+CodeHeaderLbl.TextSize = 9
 CodeHeaderLbl.TextXAlignment = Enum.TextXAlignment.Left
 
--- Khung cuon ma nguon (moi - co the cuon)
+-- Khung cuon ma nguon
 local CodeScroll = Instance.new("ScrollingFrame")
 CodeScroll.Parent = RightPanel
 CodeScroll.BackgroundTransparency = 1
 CodeScroll.BorderSizePixel = 0
-CodeScroll.Position = UDim2.new(0, 0, 0, 26)
-CodeScroll.Size = UDim2.new(1, 0, 1, -26)
-CodeScroll.CanvasSize = UDim2.new(0, 0, 0, 800)
+CodeScroll.Position = UDim2.new(0, 0, 0, 22)
+CodeScroll.Size = UDim2.new(1, 0, 1, -22)
+CodeScroll.CanvasSize = UDim2.new(0, 0, 0, 600)
 CodeScroll.ScrollBarThickness = 3
 CodeScroll.ScrollBarImageColor3 = C.Text3
 
@@ -332,9 +337,9 @@ CodeDisplay.Parent = CodeScroll
 CodeDisplay.BackgroundTransparency = 1
 CodeDisplay.Size = UDim2.new(1, 0, 0, 0)
 CodeDisplay.Font = Enum.Font.Code
-CodeDisplay.Text = '<font color="#7A828B">-- Cho su kien...\n-- Ma nguon se hien thi o day kem to mau cu phap.</font>'
+CodeDisplay.Text = '<font color="#7A828B">-- Cho su kien...\n-- Ma nguon se hien thi o day.</font>'
 CodeDisplay.TextColor3 = Color3.fromRGB(248, 248, 242)
-CodeDisplay.TextSize = 13
+CodeDisplay.TextSize = 12
 CodeDisplay.TextXAlignment = Enum.TextXAlignment.Left
 CodeDisplay.TextYAlignment = Enum.TextYAlignment.Top
 CodeDisplay.RichText = true
@@ -357,23 +362,23 @@ end)
 
 local codePad = Instance.new("UIPadding")
 codePad.Parent = CodeDisplay
-codePad.PaddingTop = UDim.new(0, 8)
-codePad.PaddingLeft = UDim.new(0, 10)
-codePad.PaddingRight = UDim.new(0, 10)
-codePad.PaddingBottom = UDim.new(0, 8)
+codePad.PaddingTop = UDim.new(0, 6)
+codePad.PaddingLeft = UDim.new(0, 8)
+codePad.PaddingRight = UDim.new(0, 8)
+codePad.PaddingBottom = UDim.new(0, 6)
 
--- ========== THANH CONG CU DUOI ==========
+-- ========== THANH CONG CU DUOI (full width) ==========
 local Toolbar = Instance.new("Frame")
 Toolbar.Parent = MainFrame
 Toolbar.BackgroundTransparency = 1
-Toolbar.Position = UDim2.new(0, 216, 1, -46)
-Toolbar.Size = UDim2.new(1, -224, 0, 38)
+Toolbar.Position = UDim2.new(0, 6, 1, -34)
+Toolbar.Size = UDim2.new(1, -12, 0, 28)
 
 local tbLayout = Instance.new("UIListLayout")
 tbLayout.Parent = Toolbar
 tbLayout.FillDirection = Enum.FillDirection.Horizontal
 tbLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-tbLayout.Padding = UDim.new(0, 6)
+tbLayout.Padding = UDim.new(0, 5)
 
 -- Ham tao nut toolbar co hover effect
 local function MakeBtn(name, text, color)
@@ -381,12 +386,12 @@ local function MakeBtn(name, text, color)
     btn.Name = name
     btn.Parent = Toolbar
     btn.BackgroundColor3 = color
-    btn.Size = UDim2.new(0, 94, 0, 30)
+    btn.Size = UDim2.new(0, 78, 0, 26)
     btn.Font = Enum.Font.GothamBold
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 11
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    btn.TextSize = 10
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
 
     local base = color
     btn.MouseEnter:Connect(function()
@@ -410,8 +415,49 @@ local CopyButton = MakeBtn("CopyBtn", "Sao chep", C.Accent)
 local SlowButton = MakeBtn("SlowBtn", "Cham: TAT", C.Gray)
 local ClearButton = MakeBtn("ClearBtn", "Xoa het", C.Red)
 
+-- ========== TAY CAM RESIZE (goc duoi phai) ==========
+local ResizeHandle = Instance.new("TextButton")
+ResizeHandle.Name = "ResizeHandle"
+ResizeHandle.Parent = MainFrame
+ResizeHandle.BackgroundColor3 = C.Resize
+ResizeHandle.BackgroundTransparency = 0.2
+ResizeHandle.Position = UDim2.new(1, -16, 1, -16)
+ResizeHandle.Size = UDim2.new(0, 16, 0, 16)
+ResizeHandle.Text = ""
+ResizeHandle.ZIndex = 10
+ResizeHandle.Active = true
+
+Instance.new("UICorner", ResizeHandle).CornerRadius = UDim.new(0, 3)
+
+-- Duong chi thi resize (2 duong cheo nho)
+local resizeLine1 = Instance.new("Frame")
+resizeLine1.Parent = ResizeHandle
+resizeLine1.BackgroundColor3 = C.Text2
+resizeLine1.BackgroundTransparency = 0.4
+resizeLine1.BorderSizePixel = 0
+resizeLine1.Position = UDim2.new(0.55, 0, 0.85, 0)
+resizeLine1.Size = UDim2.new(0.4, 0, 0, 1)
+resizeLine1.Rotation = -45
+
+local resizeLine2 = Instance.new("Frame")
+resizeLine2.Parent = ResizeHandle
+resizeLine2.BackgroundColor3 = C.Text2
+resizeLine2.BackgroundTransparency = 0.4
+resizeLine2.BorderSizePixel = 0
+resizeLine2.Position = UDim2.new(0.3, 0, 0.6, 0)
+resizeLine2.Size = UDim2.new(0.65, 0, 0, 1)
+resizeLine2.Rotation = -45
+
+-- Hover effect cho resize handle
+ResizeHandle.MouseEnter:Connect(function()
+    TweenService:Create(ResizeHandle, TweenInfo.new(0.1), {BackgroundTransparency = 0}):Play()
+end)
+ResizeHandle.MouseLeave:Connect(function()
+    TweenService:Create(ResizeHandle, TweenInfo.new(0.1), {BackgroundTransparency = 0.2}):Play()
+end)
+
 -- =====================================================================
--- 2. HE THONG KEO THA (DRAG) - HO TRO CA CHUOT VA CAM UNG
+-- 2. HE THONG KEO THA (DRAG) + RESIZE
 -- =====================================================================
 
 local function SetupDrag(handle, target, clickFn)
@@ -466,6 +512,39 @@ SetupDrag(ToggleBtn, ToggleBtn, function()
     MainFrame.Visible = true
     ToggleBtn.Visible = false
 end)
+
+-- ========== LOGIC RESIZE ==========
+do
+    local resizing, resizeInput, resizeStart, startSize
+
+    ResizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            resizing = true
+            resizeStart = input.Position
+            startSize = Vector2.new(MainFrame.Size.X.Offset, MainFrame.Size.Y.Offset)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    resizing = false
+                end
+            end)
+        end
+    end)
+
+    ResizeHandle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            resizeInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == resizeInput and resizing then
+            local delta = input.Position - resizeStart
+            local newW = math.clamp(startSize.X + delta.X, MIN_W, MAX_W)
+            local newH = math.clamp(startSize.Y + delta.Y, MIN_H, MAX_H)
+            MainFrame.Size = UDim2.new(0, newW, 0, newH)
+        end
+    end)
+end
 
 -- =====================================================================
 -- THU NHO / PHONG TO QUA ICON
@@ -669,12 +748,12 @@ local function CreateRemoteButton(remoteName, generatedCode)
     RemoteBtn.Parent = RemotesList
     RemoteBtn.BackgroundColor3 = C.SurfaceLt
     RemoteBtn.BorderSizePixel = 0
-    RemoteBtn.Size = UDim2.new(1, -6, 0, 24)
-    RemoteBtn.Position = UDim2.new(0, 3, 0, 0)
+    RemoteBtn.Size = UDim2.new(1, -4, 0, 26)
+    RemoteBtn.Position = UDim2.new(0, 2, 0, 0)
     RemoteBtn.Font = Enum.Font.Gotham
     RemoteBtn.Text = "  " .. remoteName
     RemoteBtn.TextColor3 = C.Text1
-    RemoteBtn.TextSize = 11
+    RemoteBtn.TextSize = 10
     RemoteBtn.TextXAlignment = Enum.TextXAlignment.Left
 
     -- Cat text neu qua dai
@@ -864,8 +943,8 @@ ClearButton.MouseButton1Click:Connect(function()
             child:Destroy()
         end
     end
-    CodeDisplay.Text = '<font color="#7A828B">-- Cho su kien...\n-- Ma nguon se hien thi o day kem to mau cu phap.</font>'
+    CodeDisplay.Text = '<font color="#7A828B">-- Cho su kien...\n-- Ma nguon se hien thi o day.</font>'
     _G.RawCode = ""
 end)
 
-print("CENIROSO SPY V1.8 - Giao dien moi da tai thanh cong!")
+print("CENIROSO SPY V1.8 - Giao dien mobile da tai thanh cong!")
